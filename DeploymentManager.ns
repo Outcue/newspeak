@@ -494,9 +494,7 @@ pageNamed: name <String> ^ <String> = (
              add: String lf.
 	page add: '<title>'; add: name; add: '</title>'; add: String lf.
 	page add: '</head><body>'; add: String lf.
-	page add: '<script type="text/javascript" src="CodeMirror/lib/codemirror.js"></script>'.
-	page add: '<link rel="stylesheet" href="CodeMirror/lib/codemirror.css"></link>'.
-	page add: '<script type="text/javascript" src="CodeMirror/addon/display/autorefresh.js"></script>'.
+	page add: '<script type="text/javascript" src="CodeMirror/lib/editor.js"></script>'.
 	page add: '<script type="text/javascript" src="'.
 	page add: name.
 	page add: '.sources.js"></script><script type="text/javascript" src="'.

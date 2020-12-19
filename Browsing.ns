@@ -298,8 +298,8 @@ class ClassFactoryPresenter onSubject: s <ClassFactorySubject> = MethodPresenter
 (* Present the factory method, colorized. *)
  | toggle <ToggleComposer>  public showClassName <Boolean> ::= false. |
 ) (
-changeResponse ^ <[:CodeMirrorFragment :Event]> = (
-	^[:ed <CodeMirrorFragment> :event <Event> |
+changeResponse ^ <[:CodeEditorFragment :Event]> = (
+	^[:ed <CodeEditorFragment> :event <Event> |
 		colorizeHeaderSource: (crToLf: ed textBeingAccepted) withEditor: ed.
 	 ]
 )
@@ -311,7 +311,7 @@ collapsedDefinition ^ <Fragment> = (
 	slotList.
 	}
 )
-colorizeHeaderSource: s <String> withEditor: cm <CodeMirrorFragment> = (
+colorizeHeaderSource: s <String> withEditor: cm <CodeEditorFragment> = (
 	ide colorizer colorizeHeader: s fromClass: subject classMirror via: (colorizingBlockFor: cm)
 )
 definition = (
@@ -381,7 +381,7 @@ slotList ^ <Fragment> = (
 editorDefinition = (
 	| 
 	src = crToLf: subject classHeaderSource. 
-	editor = codeMirror: src. 
+	editor = codeEditor: src. 
 	|
 	editor 
 		changeResponse: changeResponse;
@@ -390,15 +390,15 @@ editorDefinition = (
 	colorizeHeaderSource: src withEditor: editor.
 	^editor
 )
-cancelResponse ^ <[:CodeMirrorFragment]> = (
-	^[:ed <CodeMirrorFragment> |
+cancelResponse ^ <[:CodeEditorFragment]> = (
+	^[:ed <CodeEditorFragment> |
         ed text: subject classHeaderSource.
 		colorizeHeaderSource: (crToLf: subject classHeaderSource) withEditor: ed.
 		ed leaveEditState.
 	 ]
 )
-acceptResponse ^ <[:CodeMirrorFragment :Event]> = (
-	^[:ed <CodeMirrorFragment> :event <Event> |
+acceptResponse ^ <[:CodeEditorFragment :Event]> = (
+	^[:ed <CodeEditorFragment> :event <Event> |
 		| b <ClassDeclarationBuilder> = subject classMirror asBuilder. |
 		updateGUI: [
 			[b header source: ed textBeingAccepted.
@@ -489,8 +489,8 @@ class ClassPresenter onSubject: s = ProgrammingPresenter onSubject: s (
 accessIndicator = (
 	^image: (iconForAccessModifier: subject accessModifier) size: styleButtonSize.
 )
-changeResponse ^ <[:CodeMirrorFragment :Event]> = (
-	^[:ed <CodeMirrorFragment> :event <Event>  |
+changeResponse ^ <[:CodeEditorFragment :Event]> = (
+	^[:ed <CodeEditorFragment> :event <Event>  |
 		colorizeHeaderSource: (crToLf: ed textBeingAccepted) withEditor: ed.
 	  ]
 )
@@ -520,14 +520,14 @@ classNameAndContainmentDefinition ^ <Fragment> = (
 	}
 )
 classSourceDefinition = (
-	| src = crToLf: subject classHeaderSource. editor =  codeMirror: src. |
+	| src = crToLf: subject classHeaderSource. editor =  codeEditor: src. |
 	editor 
 		changeResponse: changeResponse;
 		acceptResponse: acceptResponse.
 		colorizeHeaderSource: src withEditor: editor.
 	^editor
 )
-colorizeHeaderSource: s <String> withEditor: cm <CodeMirrorFragment> = (
+colorizeHeaderSource: s <String> withEditor: cm <CodeEditorFragment> = (
 	ide colorizer colorizeHeader: s fromClass: subject classMirror via: (colorizingBlockFor: cm)
 )
 expandedHeadingDefinition ^ <Fragment> = (
@@ -647,8 +647,8 @@ public definition ^ <Fragment> = (
 respondToSave = (
 	ide webFiles downloadFileName: subject name, '.ns' fromString: subject compilationUnitSource. 
 )
-acceptResponse ^ <[:CodeMirrorFragment :Event]> = (
-	^[:ed <CodeMirrorFragment> :event <Event> |
+acceptResponse ^ <[:CodeEditorFragment :Event]> = (
+	^[:ed <CodeEditorFragment> :event <Event> |
 		| b <ClassDeclarationBuilder> = subject classMirror asBuilder. |
 		(*('ed text:', ed textBeingAccepted) out.*)
 		b header source: ed textBeingAccepted.
@@ -932,7 +932,7 @@ isMyKind: s <Subject> ^ <Boolean> = (
 public class DefinitionTemplate
    caption: c <String>
    initialText: t <String | Text>
-   colorizerBlock: cb <[:String :CodeMirrorFragment]>
+   colorizerBlock: cb <[:String :CodeEditorFragment]>
    acceptResponse: onAccept <[DefinitionTemplate]>
    cancelResponse: onCancel <[DefinitionTemplate]>
  = ProgrammingPresenter onSubject: nil (|
@@ -962,11 +962,11 @@ definition ^ <Fragment> = (
 		}) color: (Gradient from: (Color h: 100 s: 0.3 v: 0.9) to: (Color h: 100 s: 0.3 v: 0.8))
 )
 editorDefinition ^ <Fragment> = (
-	editor:: (codeMirror: initialText)
+	editor:: (codeEditor: initialText)
 	(*	acceptLabelText: 'save';
 		cancelLabelText: 'cancel';*)
 		acceptResponse: [acceptResponse value: self];
-		changeResponse: [:cm <CodeMirrorFragment> :event <Event>  | colorizerBlock value: cm textBeingAccepted value: cm];
+		changeResponse: [:cm <CodeEditorFragment> :event <Event>  | colorizerBlock value: cm textBeingAccepted value: cm];
 		cancelResponse: [cancelResponse value: self].
 	initiallyInEditState ifTrue: [editor updateEditState].
 	colorizerBlock value: initialText value: editor.
@@ -1343,7 +1343,7 @@ public addNewItemTemplate: src = (
 		caption: 'Adding new method:'
 		initialText: src
 		colorizerBlock:
-			[:text <String> :cm <CodeMirrorFragment> | subject colorizeSource: text editor: cm]
+			[:text <String> :cm <CodeEditorFragment> | subject colorizeSource: text editor: cm]
 		acceptResponse:
 			[:ed | createNewMethodFromTemplate: template]
 		cancelResponse:
@@ -1355,7 +1355,7 @@ public addNewItemTemplate: src = (
 public class MethodGroupSubject onModel: m <MirrorGroup[MethodMirror]> within: dm <MixinMirror> = MirrorGroupSubject onModel: m within: dm  (
 (* Represents the collection of methods of a Newspeak class. Holds onto the mirror group for the methods. *)
 ) (
-public colorizeSource: source <String> editor: cm <CodeMirrorFragment> ^ <TextFragment> = (
+public colorizeSource: source <String> editor: cm <CodeEditorFragment> ^ <TextFragment> = (
 	^ide colorizer
 		colorizeMethod: source
 		fromClass: definingMixin declaration
@@ -1408,7 +1408,7 @@ public class MethodPresenter onSubject: s <MethodSubject> = ProgrammingPresenter
 public collapse = (
 	^substance collapse
 )
-colorizeMethodSource: s <String> withEditor: cm <CodeMirrorFragment> = (
+colorizeMethodSource: s <String> withEditor: cm <CodeEditorFragment> = (
 	ide colorizer colorizeMethod: s fromClass: subject classDeclaration via: (colorizingBlockFor: cm)
 )
 public expand = (
@@ -1473,13 +1473,13 @@ referencesMenuMessageItems = (
 public tag ^ <String> = (
   ^subject name
 )
-changeResponse ^ <[:CodeMirrorFragment :Event]> = (
-	^[:ed <CodeMirrorFragment> :event <Event> |
+changeResponse ^ <[:CodeEditorFragment :Event]> = (
+	^[:ed <CodeEditorFragment> :event <Event> |
 		colorizeMethodSource: (crToLf: ed textBeingAccepted) withEditor: ed.
 	 ]
 )
-cancelResponse ^ <[:CodeMirrorFragment]> = (
-	^[:ed <CodeMirrorFragment> |
+cancelResponse ^ <[:CodeEditorFragment]> = (
+	^[:ed <CodeEditorFragment> |
         ed text: subject source.
 		colorizeMethodSource: (crToLf: subject source) withEditor: ed.
 		ed leaveEditState.
@@ -1507,7 +1507,7 @@ public definition ^ <Fragment> = (
 	            dropDownMenu: [methodMenuFor: subject name]
 			}
 		]
-		expanded: [ |  src = crToLf: subject source. cm = codeMirror: src. |
+		expanded: [ |  src = crToLf: subject source. cm = codeEditor: src. |
 			cm changeResponse: changeResponse; 
                   cancelResponse: cancelResponse;
                   acceptResponse: acceptResponse.
@@ -1528,8 +1528,8 @@ public definition ^ <Fragment> = (
 		}].
 	^toggle
 )
-acceptResponse ^ <[:CodeMirrorFragment :Event]> = (
-	^ [:ed <CodeMirrorFragment> :event <Event> |
+acceptResponse ^ <[:CodeEditorFragment :Event]> = (
+	^ [:ed <CodeEditorFragment> :event <Event> |
 		| b <MixinBuilder> = subject methodMirror definingMixin asBuilder. |
 		updateGUI: [
 			[b methods addFromSource: ed textBeingAccepted.
@@ -1765,7 +1765,7 @@ addClassTemplate = (
 			caption: 'Defining a new class:'
 			initialText: subject classTemplateText
 			colorizerBlock:
-				[:text <String> :cm <CodeMIrrorFragment> | subject colorizeClassSource: text editor: cm]
+				[:text <String> :cm <CodeEditorFragment> | subject colorizeClassSource: text editor: cm]
 			acceptResponse:
 				[:template | acceptNewClassDefinitionFrom: template]
 			cancelResponse:
@@ -1778,7 +1778,7 @@ addNamespaceTemplate = (
 			caption: 'Defining a new namespace:'
 			initialText: 'NewNamespace'
 			colorizerBlock:
-				[:text <String> :cm <CodeMIrrorFragment> | ]
+				[:text <String> :cm <CodeEditorFragment> | ]
 			acceptResponse:
 				[:template | acceptNewNamespaceDefinitionFrom: template]
 			cancelResponse:
@@ -1904,7 +1904,7 @@ public classTemplateText ^ <String> = (
 	|
 ) ()'
 )
-public colorizeClassSource: source <String> editor: cm <CodeMirrorFragment>  = (
+public colorizeClassSource: source <String> editor: cm <CodeEditorFragment>  = (
 	^ide colorizer
 		colorizeClassDeclaration: source
 		fromClass: nil
@@ -1993,7 +1993,7 @@ public addNewItemTemplate: src <String> = (
 			caption: 'Defining a new class:'
 			initialText: src
 			colorizerBlock:
-				[:text <String> :cm <CodeMirrorFragment> | subject colorizeClassSource: text editor: cm]
+				[:text <String> :cm <CodeEditorFragment> | subject colorizeClassSource: text editor: cm]
 			acceptResponse:
 				[:template | acceptNewClassDefinitionFrom: template]
 			cancelResponse:
@@ -2030,7 +2030,7 @@ public classTemplateText ^ <String> = (
 	|
 ) ()'
 )
-public colorizeClassSource: source <String> editor: cm <CodeMirrorFragment> = (
+public colorizeClassSource: source <String> editor: cm <CodeEditorFragment> = (
 	^ide colorizer
 		colorizeClassDeclaration: source
 		fromClass: definingMixin declaration
@@ -2628,7 +2628,7 @@ class StringView onSubject: s = ProgrammingPresenter onSubject: s (
 ) (
 public definition = (
 	| cm |
-	cm:: codeMirror: subject objectMirror reflectee.
+	cm:: codeEditor: subject objectMirror reflectee.
 	cm readOnly: true.
 	^column: {
 		cm
@@ -2643,10 +2643,10 @@ isMyKind: other <Fragment> ^ <Boolean> = (
 ) : (
 )
 public class EvaluatorPresenter onSubject: s <ObjectSubject | ActivationSubject> = ProgrammingPresenter onSubject: s (
-| cm <CodeMirrorFragment> |
+| cm <CodeEditorFragment> |
 ) (
 deadChangeResponse = (
-    ^[:editor <CodeMirrorFragment>  | 
+    ^[:editor <CodeEditorFragment>  | 
         | src <String> =  editor textBeingAccepted. |
         ide colorizer colorizeDoIt: src fromClass: nil via: (colorizingBlockFor: editor).
         editor isInEditState: true.
@@ -2707,8 +2707,8 @@ definition = (
 changeResponse = (
   ^subject isLive ifTrue: [liveChangeResponse] ifFalse: [deadChangeResponse]
 )
-evaluateResponse ^ <[:CodeMirrorFragment]> = (
-    ^[:editor <CodeMirrorFragment>  | 
+evaluateResponse ^ <[:CodeEditorFragment]> = (
+    ^[:editor <CodeEditorFragment>  | 
         | src <String> ::=  cm editor getSelection. |
         src isEmpty ifTrue: [
             src:: cm editor getValue.
@@ -2734,7 +2734,7 @@ results ^ <List[Fragment]> = (
         ]
 )
 liveChangeResponse = (
-  ^[:editor <CodeMirrorFragment>  | | src <String> =  editor textBeingAccepted. |
+  ^[:editor <CodeEditorFragment>  | | src <String> =  editor textBeingAccepted. |
 	updateGUI: [
 		subject evaluateLive: (withoutNbsp: src).
 		ide colorizer colorizeDoIt: src fromClass: nil via: (colorizingBlockFor: editor).
@@ -2755,10 +2755,10 @@ definitionForEvaluator = (
         }.		
 	}
 )
-editorDefinition ^ <CodeMirrorFragment> = (
+editorDefinition ^ <CodeEditorFragment> = (
 	| initialSource |
 	initialSource:: subject initialSource.
-	cm:: (codeMirror: initialSource) 
+	cm:: (codeEditor: initialSource) 
         changeResponse: changeResponse;
         evaluateResponse: evaluateResponse;
 		useEditControls: false.
@@ -3127,7 +3127,7 @@ public trimBlanksOff: s <String> ^ <String> = (
   ^s copyFrom: startIndex to: endIndex
 )
 )
-colorizingBlockFor: cm <CodeMirrorFragment> = (
+colorizingBlockFor: cm <CodeEditorFragment> = (
       cm resetStyles.
 	^[:r | | style <Alien[JSObject]> = JSObject new. |
 	style at: 'css' put: (cssFor: r kind).

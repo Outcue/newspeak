@@ -239,10 +239,9 @@ updateVisualsFromSameKind: oldFragment <CanvasFragment>  ^ <Alien[Canvas]>  = (
 )
 ) : (
 )
-public class CodeMirrorFragment onText: t <String> = LeafFragment (
-(* An experiment to see how to integrate CodeMirror as editor. *)
+public class CodeEditorFragment onText: t <String> = LeafFragment (
 |
-    public editor <Alien[CodeMirror]>
+    public editor <Alien[CodeEditor]>
 	textSlot <TextFragment | String> ::= t.
 	public useEditControls <Boolean> ::= true.
 	public counterfactualBar <Alien[Span]>
@@ -261,13 +260,17 @@ public class CodeMirrorFragment onText: t <String> = LeafFragment (
 |
 ) (
 applyStyle: style <{Integer. Integer. Alien[JSObject]}> = (
-	| s <Alien[CodeMirrorPosition]> e <Alien[CodeMirrorPosition]> |
+
+	(*
+	| s <Alien[CodeEditorPosition]> e <Alien[CodeEditorPosition]> |
 	(* Newspeak intervals are 1-origin and [start, stop]. JS intervals are 0-origin and [start, stop). *)
 	s:: editor posFromIndex: (style at: 1) - 1.
 	e:: editor posFromIndex: (style at: 2).
 	editor markText: s to: e style: (style at: 3).
+	*)
 )
 applyStyles = (
+	(*
     nil = editor ifFalse: [
 	styles do: [: s <{Integer. Integer. Alien[JSObject]}> |
 	applyStyle: s
@@ -275,6 +278,7 @@ applyStyles = (
      styles:: List new.
      editor refresh.
    ]
+   *)
 )
 public defaultAcceptResponse = (
 	textSlot:: editor getValue.
@@ -295,11 +299,11 @@ defaultStyle ^ <Alien[Object]> = (
 		'text-decoration: none; font-weight: normal'.
     ^style
 )
-public isKindOfCodeMirrorFragment ^ <Boolean> = (
+public isKindOfCodeEditorFragment ^ <Boolean> = (
 	^true
 )
 isMyKind: f <Fragment> ^ <Boolean> = (
-  ^f isKindOfCodeMirrorFragment
+  ^f isKindOfCodeEditorFragment
 )
 public noticeExposure = (
   refresh
@@ -308,15 +312,15 @@ public refresh = (
   applyStyles
 )
 registerBeforeChangeHandler = (
-      beforeChangeHandler:: CallBackWrapper wrapping: [:codeMirror :change | respondToBeforeChange: codeMirror. nil].
+      beforeChangeHandler:: CallBackWrapper wrapping: [:codeEditor :change | respondToBeforeChange: codeEditor. nil].
       editor on: 'beforeChange' respondToChange: beforeChangeHandler wrappedCallback.
 )
 registerChangeHandler = (
-      changeHandler:: CallBackWrapper wrapping: [:codeMirror :change | respondToChange: codeMirror. nil].
+      changeHandler:: CallBackWrapper wrapping: [:codeEditor :change | respondToChange: codeEditor. nil].
       editor on: 'change' respondToChange: changeHandler wrappedCallback.
 )
 registerKeyHandler = (
-      keyHandler:: CallBackWrapper wrapping: [:codeMirror :keydown | respondToKeyDown: codeMirror. nil].
+      keyHandler:: CallBackWrapper wrapping: [:codeEditor :keydown | respondToKeyDown: codeEditor. nil].
       editor on: 'keydown' respondToKeyDown: keyHandler wrappedCallback.
 )
 public resetStyles = (
@@ -395,7 +399,7 @@ public text: t = (
 public textBeingAccepted ^ <String> = (
   ^editor getValue
 )
-updateVisualsFromSameKind: oldFragment <CodeMirrorFragment>  ^ <Alien[CodeMIrror]> = (
+updateVisualsFromSameKind: oldFragment <CodeEditorFragment>  ^ <Alien[CodeEditor]> = (
 	isInEditState:: oldFragment isInEditState.
 	beforeChangeHandler:: oldFragment beforeChangeHandler.
 	changeHandler:: oldFragment changeHandler.
@@ -420,7 +424,7 @@ updateVisualsFromSameKind: oldFragment <CodeMirrorFragment>  ^ <Alien[CodeMIrror
 
 	messageContainer:: oldFragment messageContainer.
 
-	changeHandler callback: [:codeMirror :change | respondToChange: codeMirror. nil].
+	changeHandler callback: [:codeEditor :change | respondToChange: codeEditor. nil].
 
 	^oldFragment visual
 )
@@ -466,7 +470,7 @@ createVisual = (
     |
 
 	container:: document createElement: 'div'.
-	container at: 'id' put: 'CodeMirrorContainer'.
+	container at: 'id' put: 'CodeEditorContainer'.
 	(container at: 'style')
 		at: 'display' put: 'flex';
 		at: 'flex-direction' put: 'column';
@@ -511,7 +515,7 @@ createVisual = (
 	]
 
 	frame:: document createElement: 'div'.
-	frame at: 'id' put: 'CodeMirrorFragment'.
+	frame at: 'id' put: 'CodeEditorFragment'.
 	(frame at: 'style')
 		at: 'display' put: 'flex';
 		at: 'flex-direction' put: 'row'.
@@ -522,25 +526,24 @@ createVisual = (
 
 	textArea:: document createElement: 'textarea'.
 	textArea
+		at: 'id' put: 'code';
 		at: 'value' put:  textSlot;
 		at: 'resize' put: true.
+
 	frame appendChild: textArea.
 
 	options:: JSObject new.
-	options at: 'lineWrapping' put: true.
-	options at: 'readOnly' put: readOnly.
-    options at: 'scrollbarStyle' put: 'null'.
-	editor:: CodeMirror fromTextArea: textArea with: options.
+	options 
+		at: 'resize' put: false;
+		at: 'selector' put: 'textarea#code';		
+		at: 'toolbar' put: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image';
+		at: 'content_style' put: 'body { font-family:serif; font-size:14px }'.
+	editor:: CodeEditor init: options.
+	(*
 	registerBeforeChangeHandler.
     registerChangeHandler.
 	registerKeyHandler.
-	
-	((textArea at: 'nextSibling') at: 'style') 
-		at: 'height' put: 'unset';
-		at: 'width' put: '100%';	
-		at: 'background-color' put: 'transparent';
-		at: 'fontFamily' put: styleFontFamilySerif;
-		at: 'font-size' put: styleFontSizeEditor.
+	*)
 
 	messageContainer:: document createElement: 'div'.
 	(messageContainer at: 'style')
@@ -608,7 +611,7 @@ public childrenDo: aBlock = (
 createVisual = (
 	| div initialVisual |
 	div:: document createElement: 'div'.
-    div at: 'id' put: 'CodeMirrorFragment'.
+    div at: 'id' put: 'CodeEditorFragment'.
 	(div at: 'style') at: 'align-self' put: 'center'.
 	initialVisual:: initialContent visual.
 	div appendChild: initialVisual.
@@ -901,7 +904,7 @@ along with an implementation of isKindOfX:  public isKindOfX ^ <Boolean> = (true
   subclassResponsibility
 )
 public noticeExposure = (
-	(* Propagated down the fragment hierarchy just after the hierarchy has been made visible. A fragment may receive this message multiple times over its life. Used by certain leaf fragments,such as CodeMirrorFragment, who may need to explicitly refresh themselves upon exposure as they have no direct connection to changed subjects. *)
+	(* Propagated down the fragment hierarchy just after the hierarchy has been made visible. A fragment may receive this message multiple times over its life. Used by certain leaf fragments,such as CodeEditorFragment, who may need to explicitly refresh themselves upon exposure as they have no direct connection to changed subjects. *)
 
 	childrenDo: [:each | each noticeExposure]
 )
@@ -1890,8 +1893,8 @@ canvas: extent <Point> = (
 public childrenDo: aBlock = (
 	nil = substanceSlot ifFalse: [aBlock value: substanceSlot]
 )
-codeMirror: t <Text | String> = (
-	^CodeMirrorFragment onText: t.
+codeEditor: t <Text | String> = (
+	^CodeEditorFragment onText: t.
 )
 collapsed: collapsed <[Fragment]> expanded: expanded <[Fragment]> ^<Fragment> = (
 	^collapsed: collapsed expanded: expanded initiallyExpanded: false
@@ -2664,7 +2667,7 @@ the cursor position based on that. But so far that hasn't worked. And we have is
 	^newString size
 )
 registerChangeHandler = (
-    changeHandler:: CallBackWrapper wrapping: [:codeMirror :change | respondToChange: codeMirror. nil].
+    changeHandler:: CallBackWrapper wrapping: [:codeEditor :change | respondToChange: codeEditor. nil].
     editor on: 'change' respondToChange: changeHandler wrappedCallback.
 )
 public defaultAcceptResponse = (
@@ -3082,8 +3085,8 @@ public selector ^<Symbol> = (
 )
 ) : (
 )
-public CodeMirror = (
-  ^window at: 'CodeMirror'.
+public CodeEditor = (
+  ^window at: 'tinymce'.
 )
 deferAction: action = (
 	deferredContentQueue add: action.

@@ -31,18 +31,18 @@ class Debugging usingPlatform: platform ide: ide = (
 class ActivationPresenter onSubject: s <ActivationSubject> = ProgrammingPresenter onSubject: s (
 	|
 	slots <PresenterList>
-	editor <CodeMirrorFragment>
+	editor <CodeEditorFragment>
     mustBeExpanded ::= false. (*  See isExpanded for a discussion of this slot's purpose *)
 	|
 ) (
-acceptResponse ^ <[:CodeMirrorFragment :Event]> = (
-	^ [:ed <CodeMirrorFragment> :event <Event> |
+acceptResponse ^ <[:CodeEditorFragment :Event]> = (
+	^ [:ed <CodeEditorFragment> :event <Event> |
 		updateGUI: [respondToSourceAccept: ed].
 		ed editor focus.
 		]
 )
-changeResponse ^ <[:CodeMirrorFragment :Event]> = (
-	^[:ed <CodeMirrorFragment> :event <Event> | | cp <Integer> |
+changeResponse ^ <[:CodeEditorFragment :Event]> = (
+	^[:ed <CodeEditorFragment> :event <Event> | | cp <Integer> |
 		ed updateEditState.
 	 ]
 )
@@ -87,7 +87,7 @@ definitionForControls = (
 	}
 )
 definitionForSource = (
-	editor:: codeMirror: subject source.
+	editor:: codeEditor: subject source.
 	editor acceptResponse: acceptResponse; changeResponse: changeResponse.
 	highlightSourceRange.
 	^editor
@@ -275,7 +275,7 @@ definitionForHeader = (
 		dropDownMenu: [actionsMenu].
 	}
 )
-respondToSourceAccept: editor <CodeMirrorFragment> = (
+respondToSourceAccept: editor <CodeEditorFragment> = (
 	subject
 		installNewSource: editor textBeingAccepted
 		ifSuccess: [editor leaveEditState]

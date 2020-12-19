@@ -60,7 +60,6 @@ manifest MirrorBuilderTesting.
 	
 	private imagesOuter = HopscotchImages packageUsing: manifest. (* Should be `images` but there appears to be an outer send bug in NS2V8. *)
 	|
-	(* manifest codemirror.*)
 ) (
 class HopscotchImages packageUsing: manifest = (
 	|

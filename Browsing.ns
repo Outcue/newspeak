@@ -2848,7 +2848,7 @@ public respondToMakeButton = (
         ].
         src isEmpty ifFalse: [
             | 
-            button <ButtonFragment> = button: src action: [ 
+            button <ButtonFragment> = button: label action: [ 
                updateGUI: [subject evaluate: (withoutNbsp: src)]].
             |
             cm replace: button.         

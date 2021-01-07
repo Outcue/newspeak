@@ -241,7 +241,6 @@ updateVisualsFromSameKind: oldFragment <CanvasFragment>  ^ <Alien[Canvas]>  = (
 ) : (
 )
 public class CodeMirrorFragment onText: t <String> = LeafFragment (
-(* An experiment to see how to integrate CodeMirror as editor. *)
 |
     public editor <Alien[CodeMirror]>
 	textSlot <TextFragment | String> ::= t.
@@ -906,7 +905,7 @@ Another subclass responsibility is #updateVisualsFromSameKind:, which updates th
 (presumably older) fragment of the same kind.
 
 *)
-      |
+    |
 	visualX
 	public parent
 	public size ::= nil.
@@ -1401,11 +1400,13 @@ public openSubject: s = (
 	^into: body openSubject: s
 )
 )
-class HyperlinkFragment label: l action: a = LeafFragment (|
+class HyperlinkFragment label: l action: a = LeafFragment (
+    |
 	public label = l.
 	action = a.
 	public color ::= Color r: 0 g: 0 b: 1.
-|) (
+    |
+) (
 createVisual = (
 	| 
     container = document createElement: 'div'.
@@ -1420,6 +1421,10 @@ createVisual = (
         at: 'min-height' put: styleRowHeight;
         at: 'cursor' put: 'pointer'.
 
+    container addEventListener: 'click' action: [:event | 
+        clickHandler = nil ifFalse: [ clickHandler ]
+    ].
+
     anchor at: 'id' put: 'HyperlinkFragment'.
 	anchor at: 'href' put: '#'.
 	anchor appendChild: (document createTextNode: label).
@@ -1428,7 +1433,7 @@ createVisual = (
 		at: 'textDecoration' put: 'none'; (* No underline *)
 		at: 'overflow' put: 'hidden';
         at: 'white-space' put: 'nowrap'.
-
+        
     anchor
         addEventListener: 'mouseover' action:
             [:event | (anchor at: 'style') at: 'textDecoration' put: 'underline'. nil];
@@ -1543,13 +1548,35 @@ updateVisualsFromSameKind: oldFragment <Fragment> ^ <Alien[Element]> = (
 )
 ) : (
 )
-class LeafFragment = Fragment () (
+class LeafFragment = Fragment (
+    |    
+    clickHandler <[]>
+    touchStartHandler <[]>
+    touchMoveHandler <[]>
+    touchStopHandler <[]>
+    |
+) (
 public childrenDo: aBlock = (
 	(* No children. *)
 )
 public hasPendingChanges ^<Boolean> = (
     (* For simplicity, we assume that most leaf fragments can never have pending changes. Those for which it is not true should override this method. *)
     ^false
+)
+public onClick: block <[]> = (
+    clickHandler:: block
+)
+public onTouchStart = (        
+    touchStartHandler = nil ifFalse: [
+    ]
+)
+public onTouchMove = (
+    touchMoveHandler = nil ifFalse: [
+    ]
+)
+public onTouchStop = (
+    touchStopHandler = nil ifFalse: [
+    ]
 )
 ) : (
 )
@@ -2405,13 +2432,15 @@ public registerNewPresenter: newPresenter <Presenter>  = (
 )
 ) : (
 )
-class StaticImageFragment image: i = LeafFragment (|
+class StaticImageFragment image: i = LeafFragment (
+    |
 	public image = i.
     public width <Float> ::= -1.
     public height <Float> ::= -1.
     widthStyle <String> ::= 'auto'.
     heightStyle <String> ::= 'auto'.
-|) (
+    |
+) (
 createVisual = (
 	| div img |
 	div:: document createElement: 'div'.

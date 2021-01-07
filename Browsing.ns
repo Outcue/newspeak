@@ -2826,15 +2826,15 @@ public respondToMakeButton = (
         title <String>
         |
 
-        title:: prompt: 'Enter the button title' input: defaultTitle.
-        title isEmpty ifTrue: [ title:: defaultTitle ].
+        (*title:: prompt: 'Enter the button title' input: defaultTitle.
+        title isEmpty ifTrue: [ title:: defaultTitle ].*)
 
         src isEmpty ifTrue: [
             src:: cm currentLine.
         ].
         src isEmpty ifFalse: [
             | 
-            button <ButtonFragment> = button: title action: [ 
+            button <ButtonFragment> = button: src action: [ 
                updateGUI: [subject evaluate: (withoutNbsp: src)]].
             |
             cm insert: button atLine: cm currentLineNumber andColumn: cm currentColumnNumber.         

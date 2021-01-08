@@ -526,18 +526,6 @@ updateVisualsFromSameKind: oldFragment <CodeMirrorFragment>  ^ <Alien[CodeMirror
 public currentLine ^ <String> = (
   ^editor getLine: currentLineNumber
 )
-public insert: fragment<Fragment> atLine: line<Integer> andColumn: column<Integer> = (
-    |
-    position = JSObject new.
-	replaced = JSObject new.
-	visual = fragment visual.
-    |
-	position at: 'line' put: line.
-	position at: 'ch' put: column.
-    replaced at: 'replacedWith' put: visual.
-    replaced at: 'clearWhenEmpty' put: false.
-    editor markText: position end: position replacedWith: replaced.
-)
 public showFragment: message <Fragment> = (
 	messageContainer at: 'innerHTML' put: message.
 	visual appendChild: messageContainer.
@@ -1433,14 +1421,9 @@ createVisual = (
         at: 'min-height' put: styleRowHeight;
         at: 'cursor' put: 'pointer'.
 
-    container addEventListener: 'click' action: [:event | 
-        clickHandler = nil ifFalse: [ clickHandler ]
-    ].
-
     anchor at: 'id' put: 'HyperlinkFragment'.
 	anchor at: 'href' put: '#'.
 	anchor appendChild: (document createTextNode: label).
-	anchor at: 'onclick' put: [:event | action value. false].
 	(anchor at: 'style')
 		at: 'textDecoration' put: 'none'; (* No underline *)
 		at: 'overflow' put: 'hidden';
@@ -1560,13 +1543,27 @@ updateVisualsFromSameKind: oldFragment <Fragment> ^ <Alien[Element]> = (
 )
 ) : (
 )
+(* 
+A LeafFragment fragment has no children.
+
+Event listeners can be added as closures to respond to mouse and touch events.
+
+How these various handlers are implimented is a design decision of classes that
+derive from LeafFragment.
+
+Each subclass should support each of event handlers.
+*)
 class LeafFragment = Fragment (
+    |        
+    clickHandler <[:event]> ::= [:event | 'onClick unimplemented' out].
+    mouseDownHandler <[:event]> ::= [:event | 'onMouseDown unimplemented' out].
+    mouseMoveHandler <[:event]> ::= [:event | 'onMouseMove unimplemented' out].
+    mouseOverHandler <[:event]> ::= [:event | 'onMouseOver unimplemented' out].
+    mouseUpHandler <[:event]> ::= [:event | 'onMouseUp unimplemented' out].
+    touchStartHandler <[:event]> ::= [:event | 'onTouchStart unimplemented' out].
+    touchMoveHandler <[:event]> ::= [:event | 'onTouchMove unimplemented' out].
+    touchStopHandler <[:event]> ::= [:event | 'onTouchStop unimplemented' out].
     |    
-    clickHandler <[]>
-    touchStartHandler <[]>
-    touchMoveHandler <[]>
-    touchStopHandler <[]>
-    |
 ) (
 public childrenDo: aBlock = (
 	(* No children. *)
@@ -1575,20 +1572,29 @@ public hasPendingChanges ^<Boolean> = (
     (* For simplicity, we assume that most leaf fragments can never have pending changes. Those for which it is not true should override this method. *)
     ^false
 )
-public onClick: block <[]> = (
+public onClick: block <[:event]> = (        
     clickHandler:: block
 )
-public onTouchStart = (        
-    touchStartHandler = nil ifFalse: [
-    ]
+public onMouseDown: block <[:event]> = (        
+    mouseDownHandler:: block
 )
-public onTouchMove = (
-    touchMoveHandler = nil ifFalse: [
-    ]
+public onMouseMove: block <[:event]> = (
+    mouseMoveHandler:: block
 )
-public onTouchStop = (
-    touchStopHandler = nil ifFalse: [
-    ]
+public onMouseOver: block <[:event]> = (
+    mouseOverHandler:: block
+)
+public onMouseUp: block <[:event]> = (
+    mouseUpHandler:: block
+)
+public onTouchStart: block <[:event]> = (        
+    touchStartHandler:: block
+)
+public onTouchMove: block <[:event]> = (
+    touchMoveHandler:: block
+)
+public onTouchStop: block <[:event]> = (
+    touchStopHandler:: block
 )
 ) : (
 )
@@ -2507,6 +2513,12 @@ createVisual = (
 	div at: 'textContent' put: text.
 	nil = color ifFalse:
 		[(div at: 'style') setProperty: 'color' to: color asCSSString].
+
+    div  at: 'onclick' put: [:event | clickHandler value: event. false];
+        at: 'mousedown' put: [:event | mouseDownHandler value: event. false];
+        at: 'mousemove' put: [:event | mouseMoveHandler value: event. false];
+        at: 'mouseup' put: [:event | mouseUpHandler value: event. false].
+
 	^div
 )
 public isKindOfStaticLabelFragment ^ <Boolean> = (

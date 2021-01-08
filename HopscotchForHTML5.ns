@@ -1546,18 +1546,19 @@ updateVisualsFromSameKind: oldFragment <Fragment> ^ <Alien[Element]> = (
 (* 
 A LeafFragment fragment has no children.
 
-Event listeners can be added as closures to respond to mouse and touch events.
+Event listeners can be added as closures to respond to events.
 
-How these various handlers are implimented is a design decision of classes that
+How these various handlers are implemented is a design decision of classes that
 derive from LeafFragment.
 
-Each subclass should support each of event handlers.
+Each subclass should support every event handler when appropriate.
 *)
 class LeafFragment = Fragment (
     |        
     clickHandler <[:event]> ::= [:event | 'onClick unimplemented' out].
     mouseDownHandler <[:event]> ::= [:event | 'onMouseDown unimplemented' out].
     mouseMoveHandler <[:event]> ::= [:event | 'onMouseMove unimplemented' out].
+    mouseOutHandler <[:event]> ::= [:event | 'onMouseOut unimplemented' out].
     mouseOverHandler <[:event]> ::= [:event | 'onMouseOver unimplemented' out].
     mouseUpHandler <[:event]> ::= [:event | 'onMouseUp unimplemented' out].
     touchStartHandler <[:event]> ::= [:event | 'onTouchStart unimplemented' out].
@@ -1580,6 +1581,9 @@ public onMouseDown: block <[:event]> = (
 )
 public onMouseMove: block <[:event]> = (
     mouseMoveHandler:: block
+)
+public onMouseOut: block <[:event]> = (
+    mouseOutHandler:: block
 )
 public onMouseOver: block <[:event]> = (
     mouseOverHandler:: block
@@ -2515,9 +2519,11 @@ createVisual = (
 		[(div at: 'style') setProperty: 'color' to: color asCSSString].
 
     div  at: 'onclick' put: [:event | clickHandler value: event. false];
-        at: 'mousedown' put: [:event | mouseDownHandler value: event. false];
-        at: 'mousemove' put: [:event | mouseMoveHandler value: event. false];
-        at: 'mouseup' put: [:event | mouseUpHandler value: event. false].
+        at: 'onmousedown' put: [:event | mouseDownHandler value: event. false];
+        at: 'onmousemove' put: [:event | mouseMoveHandler value: event. false];
+        at: 'onmouseout' put: [:event | mouseOutHandler value: event. false];
+        at: 'onmouseover' put: [:event | mouseOverHandler value: event. false];
+        at: 'onmouseup' put: [:event | mouseUpHandler value: event. false].
 
 	^div
 )

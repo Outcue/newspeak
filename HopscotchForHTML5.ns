@@ -1423,6 +1423,7 @@ createVisual = (
 
     anchor at: 'id' put: 'HyperlinkFragment'.
 	anchor at: 'href' put: '#'.
+    anchor at: 'onclick' put: [:event | action value. false].
 	anchor appendChild: (document createTextNode: label).
 	(anchor at: 'style')
 		at: 'textDecoration' put: 'none'; (* No underline *)
@@ -1580,7 +1581,6 @@ that have a single point of interaction. Classes composed of multiple elements
 may need a more granular registration mechanism.
 *)
 registerGestures: element <Alien[HTMLElement]> = (
-
     element  at: 'onclick' put: [:event | onClick value: event. false];
         at: 'onmousedown' put: [:event | onMouseDown value: event. false];
         at: 'onmousemove' put: [:event | onMouseMove value: event. false];
@@ -2476,6 +2476,9 @@ createVisual = (
 		at: 'height' put: heightStyle;
         at: 'object-fit' put: 'contain'.
 	div appendChild: img.
+
+    registerGestures img.
+
 	^div
 )
 public isKindOfStaticImageFragment ^ <Boolean> = (

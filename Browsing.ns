@@ -1150,7 +1150,7 @@ definition = (
 				link: 'Newspeak Source' action: [navigateToNamespace].
 			}
 			column2: {
-		        link: 'Workspaces' action: [navigateToWorkspaces].
+				link: 'Workspaces' action: [navigateToWorkspaces].
 			}
 			column3: {
 			}).

@@ -163,17 +163,67 @@ updateVisualsFromSameKind: oldFragment <Fragment> ^ <Alien[Element]> = (
 )
 ) : (
 )
-class ButtonFragment label: l action: a = LeafFragment (|
-	public label = l.
-	action = a.
-	public enabled ::= true.
-|) (
+class RectangleFragment = BlankFragment (
+    style backgroundColor: Color black.
+) (
 createVisual = (
-	^(document createElement: 'button')
-		appendChild: (document createTextNode: label);
+    | rectangle = super createVisual. |
+    applyStyle: rectangle.
+
+    (rectangle at: 'style')
+        at: 'cursor' put: 'pointer'.
+        
+    ^rectangle.
+)
+public isKindOfRectangleFragment ^ <Boolean> = (
+  ^true
+)
+isMyKind: f <Fragment> ^ <Boolean> = (
+  ^f isKindOfRectangleFragment
+)
+updateVisualsFromSameKind: oldFragment <Fragment> ^ <Alien[Element]> = (
+  ^oldFragment visual
+)
+public fill: color <Color> = (
+)
+) : (
+)
+class Style = (
+    |
+    public backgroundColor <Color> ::= Color white.
+    public foregroundColor <Color> ::= Color black.
+    public border <String> ::= 'none'.
+    public cornerRadius <Float> ::= 0.
+    |
+) (
+)
+class ButtonStyle = Style(
+    backgroundColor:: Color gray: 0.97.
+    foregroundColor:: Color gray: 0.17.
+    cornerRadius:: 5.
+) (
+)
+class ButtonFragment label: l action: a = LeafFragment (
+    |
+	public label = l.
+    public enabled ::= true.
+	action = a.
+    style <ButtonStyle> = ButtonStyle new.
+    |
+) (
+createVisual = (
+    |
+    button = document createElement: 'button'.
+    |
+    button
+        appendChild: (document createTextNode: label);
 		at: 'onclick' put: [:event | action value. false];
 		at: 'disabled' put: enabled not;
-		yourself
+		yourself.
+
+    applyStyle: button.
+
+    ^button
 )
 public isKindOfButtonFragment ^ <Boolean> = (
 	^true
@@ -1566,6 +1616,13 @@ class LeafFragment = Fragment (
     public onTouchMove <[:event]> ::= [:event | ].
     public onTouchStop <[:event]> ::= [:event | ].
     public onWheel <[:event]> ::= [:event | ].
+
+    width <Float> ::= -1.
+    height <Float> ::= -1.
+    widthStyle <String> ::= 'auto'.
+    heightStyle <String> ::= 'auto'.
+
+    style = Style new.
     |    
 ) (
 public childrenDo: aBlock = (
@@ -1575,8 +1632,27 @@ public hasPendingChanges ^<Boolean> = (
     (* For simplicity, we assume that most leaf fragments can never have pending changes. Those for which it is not true should override this method. *)
     ^false
 )
+public frame: width <Float> height: h <Float> = (
+    width:: width.
+    height:: h.
+)
+applyStyle: element <Alien[HTMLElement]> = (
+    nil = style ifFalse: [
+
+        width = -1 ifFalse: [ widthStyle:: width printString, 'px' ].
+        height = -1 ifFalse: [ heightStyle:: height printString, 'px' ].
+
+        (element at: 'style')
+            at: 'width' put: widthStyle;
+            at: 'height' put: heightStyle;
+            at: 'background-color' put: (style backgroundColor) asCSSString;
+            at: 'color' put: (style foregroundColor) asCSSString;
+            at: 'border' put: style border;
+            at: 'border-radius' put: style cornerRadius asString, 'px'.
+    ].
+)
 (* 
-Register gesture handlers on element. This is a convenience method for classes
+Register gesture handlers on an element. This is a convenience method for classes
 that have a single point of interaction. Classes composed of multiple elements
 may need a more granular registration mechanism.
 *)
@@ -1982,6 +2058,9 @@ button: label <String> action: block <[]> = (
 canvas: extent <Point> = (
 	^CanvasFragment withExtent: extent
 )
+rectangle = (
+	^RectangleFragment new
+)
 public childrenDo: aBlock = (
 	nil = substanceSlot ifFalse: [aBlock value: substanceSlot]
 )
@@ -2088,12 +2167,6 @@ image: image <Image> = (
 	fragment:: StaticImageFragment image: image.
 	^fragment 
 )
-image: image <Image> size: s <Float> = (
-	| fragment <StaticImageFragment> |
-	fragment:: StaticImageFragment image: image.
-    fragment height: s.
-	^fragment 
-)
 imageButton: image <Image> action: block <[]> = (
 	^ImageButtonFragment new
         image: image;
@@ -2147,9 +2220,6 @@ public listElementMetapresenter ^<Presenter> = (
         filler compressibility: 0.
         (deferred: [extraInformationMetapresenter]) compressibility: 1.
     }
-)
-mediumBlank = (
-	^blank: 10
 )
 minimalMetapresenter ^<Presenter> = (
 (* A minimal presenter that can represent the receiver in places such as the History. *)
@@ -2264,6 +2334,9 @@ creatingWindowCompatibleWith: p <Presenter> ^ <Boolean> = (
 )
 smallBlank = (
 	^blank: 5
+)
+mediumBlank = (
+	^blank: 10
 )
 html: h <String> = (
   ^HTMLFragment html: h
@@ -2477,7 +2550,7 @@ createVisual = (
         at: 'object-fit' put: 'contain'.
 	div appendChild: img.
 
-    registerGestures img.
+    registerGestures: img.
 
 	^div
 )
@@ -2906,8 +2979,8 @@ public forString: s <String> properties: tps <TextProperties> ^<Instance> = (
 )
 )
 class ToggleComposer collapsedDefinition: collapsed <[Fragment]>
- expandedDefinition: expanded <[Fragment]>
- initiallyExpanded: flag <Boolean> = Composer (
+    expandedDefinition: expanded <[Fragment]>
+    initiallyExpanded: flag <Boolean> = Composer (
 |
 expandedDefinition <[Fragment]> = expanded.
 collapsedDefinition <[Fragment]> = collapsed.

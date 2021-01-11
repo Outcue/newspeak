@@ -171,8 +171,10 @@ createVisual = (
     applyStyle: rectangle.
 
     (rectangle at: 'style')
-        at: 'cursor' put: 'pointer'.
+        at: 'cursor' put: 'default'.
         
+    registerGestures: rectangle.
+    
     ^rectangle.
 )
 public isKindOfRectangleFragment ^ <Boolean> = (
@@ -1614,13 +1616,15 @@ class LeafFragment = Fragment (
     |        
     public onClick <[:event]> ::= [:event | ].
     public onMouseDown <[:event]> ::= [:event | ].
+    public onMouseEnter <[:event]> ::= [:event | ].
     public onMouseMove <[:event]> ::= [:event | ].
     public onMouseOver <[:event]> ::= [:event | ].
     public onMouseOut <[:event]> ::= [:event | ].
     public onMouseUp <[:event]> ::= [:event | ].
     public onTouchStart <[:event]> ::= [:event | ].
     public onTouchMove <[:event]> ::= [:event | ].
-    public onTouchStop <[:event]> ::= [:event | ].
+    public onTouchEnd <[:event]> ::= [:event | ].
+    public onTouchCancel <[:event]> ::= [:event | ].
     public onWheel <[:event]> ::= [:event | ].
 
     width <Float> ::= -1.
@@ -1682,15 +1686,18 @@ that have a single point of interaction. Classes composed of multiple elements
 may need a more granular registration mechanism.
 *)
 registerGestures: element <Alien[HTMLElement]> = (
-    element  at: 'onclick' put: [:event | onClick value: event. false];
+    element  
+        at: 'onclick' put: [:event | onClick value: event. false];
         at: 'onmousedown' put: [:event | onMouseDown value: event. false];
+        at: 'onmouseenter' put: [:event | onMouseEnter value: event. false];
         at: 'onmousemove' put: [:event | onMouseMove value: event. false];
         at: 'onmouseout' put: [:event | onMouseOut value: event. false];
         at: 'onmouseover' put: [:event | onMouseOver value: event. false];
         at: 'onmouseup' put: [:event | onMouseUp value: event. false];
         at: 'ontouchstart' put: [:event | onTouchStart value: event. false];
         at: 'ontouchmove' put: [:event | onTouchMove value: event. false];
-        at: 'ontouchstrop' put: [:event | onTouchStop value: event. false];
+        at: 'ontouchend' put: [:event | onTouchEnd value: event. false];
+        at: 'ontouchcancel' put: [:event | onTouchCancel value: event. false];
         at: 'onwheel' put: [:event | onWheel value: event. false].
 )        
 ) : (

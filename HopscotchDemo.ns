@@ -33,7 +33,13 @@ public definition = (
         (column: {
             label: 'Text'.
             rectangle
-                frame: 100 height: 100.
+                fill: Color blue;
+                frame: 100 height: 100;
+                border: Color red.
+            rectangle
+                fill: Color green;
+                frame: 100 height: 100;
+                border: Color yellow width: 3.
         })
             color: (Color gray: 0.5)
     }

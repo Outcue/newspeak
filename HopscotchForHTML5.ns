@@ -185,6 +185,7 @@ updateVisualsFromSameKind: oldFragment <Fragment> ^ <Alien[Element]> = (
   ^oldFragment visual
 )
 public fill: color <Color> = (
+    style backgroundColor: color.
 )
 ) : (
 )
@@ -192,7 +193,12 @@ class Style = (
     |
     public backgroundColor <Color> ::= Color white.
     public foregroundColor <Color> ::= Color black.
-    public border <String> ::= 'none'.
+
+    public borderType <String> ::= 'none'.
+    public borderColor <Color> ::= Color white.
+    public borderStyle <String> ::= 'solid'.
+    public borderWidth <Float> ::= 0.
+
     public cornerRadius <Float> ::= 0.
     |
 ) (
@@ -449,9 +455,9 @@ createVisual = (
 		at: 'min-height' put: styleTextInputHeight;
 		at: 'background-color' put: 'white';
 		at: 'opacity' put: 1.0;
-		at: 'borderStyle' put: 'solid';
-		at: 'borderWidth' put: '1px';
-		at: 'borderColor' put: styleBorderColor.
+		at: 'border-style' put: 'solid';
+		at: 'border-width' put: '1px';
+		at: 'border-color' put: styleBorderColor.
 
 	useEditControls ifTrue: [
 		counterfactualBar:: document createElement: 'div'.
@@ -1632,6 +1638,17 @@ public hasPendingChanges ^<Boolean> = (
     (* For simplicity, we assume that most leaf fragments can never have pending changes. Those for which it is not true should override this method. *)
     ^false
 )
+public border: color <Color> = (
+    border: color width: 1.0.
+)
+public border: color <Color> width: w <Float> = (
+    style borderColor: color.
+    style borderWidth: w.
+
+    w ~= 0 ifTrue: [
+        style borderType: 'solid'.
+    ].
+)
 public frame: width <Float> height: h <Float> = (
     width:: width.
     height:: h.
@@ -1647,9 +1664,17 @@ applyStyle: element <Alien[HTMLElement]> = (
             at: 'height' put: heightStyle;
             at: 'background-color' put: (style backgroundColor) asCSSString;
             at: 'color' put: (style foregroundColor) asCSSString;
-            at: 'border' put: style border;
+            at: 'border' put: 'none';
             at: 'border-radius' put: style cornerRadius asString, 'px'.
-    ].
+
+        'none' = (style borderType) ifFalse: [
+            (element at: 'style')
+                at: 'border' put: (style borderType);
+                at: 'border-color' put: (style borderColor) asCSSString;
+                at: 'border-width' put: (style borderWidth) printString, 'px';
+                at: 'border-style' put: (style borderStyle).
+        ].            
+    ].           
 )
 (* 
 Register gesture handlers on an element. This is a convenience method for classes
@@ -2046,7 +2071,7 @@ public = anotherPresenter = (
 alert: text = (
 	window alert: text
 )
-prompt: title input: i <String> ^ <String> = (
+prompt: title <String> input: i <String> ^ <String> = (
 	^window prompt: title input: i.
 )
 blank: size = (
@@ -2749,10 +2774,10 @@ createVisual = (
 		|
 
         (editor at: 'style')
-			at: 'borderStyle' put: 'solid';
-			at: 'borderWidth' put: '1px';
-			at: 'borderColor' put: styleBorderColor;
-            at: 'borderRadius' put: styleDefaultRadius;
+			at: 'border-style' put: 'solid';
+			at: 'border-width' put: '1px';
+			at: 'border-color' put: styleBorderColor;
+            at: 'border-radius' put: styleDefaultRadius;
 			at: 'background-color' put: 'white'.
 
 		editor addEventListener: 'keydown' action: 

@@ -56,13 +56,13 @@ In some systems, presenters are stateless, but this only moves the problem aroun
 
 The diff process is driven by the #updateVisualsFrom: method of Fragment which accepts an old fragment to compare against. If fragments are not of the same kind, a new visual is computed and attached to the DOM at the right place.  To test whether fragments are of the same kind, they must implement #isMyKind:, which tests whether another fragment is of the same kind. The implementation is #isMyKind: is formulaic, calling #isKindOfX for whatever type X the presenter represents. 
 
-If the incoming fragment parameter is of the same kind as the receiver,  #updateVisualsFrom: calls #updateFromSameKind: which Fragment subclasses must also implement. 
+If the incoming fragment parameter is of the same kind as the receiver,  #updateVisualsFrom: calls #updateVisualsFromSameKind: which Fragment subclasses must also implement. 
 
-The method #updateFromSameKind:  is responsible for recomputing  the visual for the fragment, utilizing any relevant information from the old fragment. Typically this means preserving any state that should be retained across refreshes. Where possible, part or all of the original visual is reused. Using the visual returned by #updateFromSameKind:, #updateVisualsFrom: updates the cached visual of the fragment. 
+The method #updateVisualsFromSameKind:  is responsible for recomputing  the visual for the fragment, utilizing any relevant information from the old fragment. Typically this means preserving any state that should be retained across refreshes. Where possible, part or all of the original visual is reused. Using the visual returned by #updateVisualsFromSameKind:, #updateVisualsFrom: updates the cached visual of the fragment. 
 
-In many cases, users of the framework can rely on the #updateFromSameKind: implementation of Presenter. However, if the user code has interesting state that requires deeper semantic understanding to preserve, this may not be sufficient. In that case, there are two choices:
+In many cases, users of the framework can rely on the #updateVisualsFromSameKind: implementation of Presenter. However, if the user code has interesting state that requires deeper semantic understanding to preserve, this may not be sufficient. In that case, there are two choices:
 
-a. Override #updateFromSameKind: in presenter class(es). 
+a. Override #updateVisualsFromSameKind: in presenter class(es). 
 b. Capture the state in a suitable subject class.
 
 (b) is usually preferred, but there are cases where the state is entirely related to presentation and therefore (a) is required. 
@@ -198,8 +198,6 @@ class SliderFragment value: v <Float> min: mn <Float> max: mx <Float> action: a 
     max <Float> = mx.
     action <[]> = a.
     |
-
-    v out.
 ) (
 createVisual = (
     | 
@@ -230,6 +228,7 @@ updateVisualsFromSameKind: oldFragment <Fragment> ^ <Alien[Element]> = (
         at: 'oninput' put: [:event | 
             action value: (Float parse: (slider at: 'value')).
         ].
+
    ^oldVisual
 )
 ) : (

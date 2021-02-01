@@ -1,5 +1,5 @@
 Newspeak3
-'Samples'
+'Root'
 class HopscotchFontDemo packageUsing: manifest = (
 	|
 	private hopscotchRuntime = manifest HopscotchForHTML5Runtime packageUsing: manifest.
@@ -16,6 +16,12 @@ class DemoPresenter onSubject: s = Presenter onSubject: s (
     underlined <State> = State value: true.  
     |
 ) (
+public isKindOfDemoPresenter ^ <Boolean> = (
+  ^true
+)
+isMyKind: f <Fragment> ^ <Boolean> = (
+  ^f isKindOfDemoPresenter
+)
 public definition = (
     ^row: {
         column: {
@@ -192,6 +198,10 @@ public definition = (
             (row: {
                 (label: 'Heavy')
                     fontWeight: #heavy.
+
+                mediumBlank.
+
+                progressBar: 0.5.
             }).
 
             mediumBlank.
@@ -202,12 +212,6 @@ public definition = (
             }).    
         }.
     }
-)
-public isKindOfDemoPresenter ^ <Boolean> = (
-  ^true
-)
-isMyKind: f <Fragment> ^ <Boolean> = (
-  ^f isKindOfDemoPresenter
 )
 ) : (
 )
